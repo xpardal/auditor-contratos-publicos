@@ -1313,6 +1313,8 @@ elif fuente.startswith("❓"):
         secciones: list[tuple[str, str]] = []
         for bloque in bloques[1:]:
             titulo, _, cuerpo = bloque.partition("\n")
+            if titulo.strip().casefold() == "índice":
+                continue
             secciones.append((titulo.strip(), "## " + bloque))
 
         st.markdown(cabecera)
@@ -1325,11 +1327,16 @@ elif fuente.startswith("❓"):
                 label_visibility="collapsed",
             )
             if seleccion == "📑 Índice completo":
-                st.markdown(
-                    "**Haz clic en una sección de la lista de la izquierda "
-                    "para abrirla.** A continuación tienes la guía completa "
-                    "para imprimir o leer en línea:"
+                lista_secciones = "\n".join(
+                    f"{i}. {titulo}"
+                    for i, (titulo, _) in enumerate(secciones, start=1)
                 )
+                st.markdown(
+                    "**Usa el selector superior para abrir una sección concreta.** "
+                    "A continuación tienes la guía completa para imprimir o leer "
+                    "en línea:"
+                )
+                st.markdown("**Secciones:**\n" + lista_secciones)
                 for _, cuerpo in secciones:
                     st.markdown(cuerpo)
             else:
