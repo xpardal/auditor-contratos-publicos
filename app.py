@@ -1327,16 +1327,6 @@ elif fuente.startswith("❓"):
                 label_visibility="collapsed",
             )
             if seleccion == "📑 Índice completo":
-                lista_secciones = "\n".join(
-                    f"{i}. {titulo}"
-                    for i, (titulo, _) in enumerate(secciones, start=1)
-                )
-                st.markdown(
-                    "**Usa el selector superior para abrir una sección concreta.** "
-                    "A continuación tienes la guía completa para imprimir o leer "
-                    "en línea:"
-                )
-                st.markdown("**Secciones:**\n" + lista_secciones)
                 for _, cuerpo in secciones:
                     st.markdown(cuerpo)
             else:
