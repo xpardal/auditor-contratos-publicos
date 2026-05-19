@@ -125,6 +125,24 @@ La integración continua ejecuta la suite en GitHub Actions con Python 3.10 y 3.
 
 El proyecto incluye configuración experimental de PyInstaller en [packaging/](packaging/) y un workflow de release en [.github/workflows/release.yml](.github/workflows/release.yml). La vía recomendada sigue siendo ejecutar la app con Python y los lanzadores incluidos, porque es más transparente y reproducible.
 
+## Cómo citar
+
+Si usas este repositorio, la aplicación o parte de su código en un trabajo académico, periodístico o docente, cita a sus autores:
+
+> Pardal Pérez, Xoán Xosé, y Quian, Alberto (2026). *Auditor de Contratos Públicos* (versión 1.0.1) [software]. Universidade de Santiago de Compostela. https://github.com/AlbertoQuian/auditor-contratos-publicos
+
+```bibtex
+@software{pardal_perez_quian_2026_auditor_contratos_publicos,
+	author = {Pardal Pérez, Xoán Xosé and Quian, Alberto},
+	title = {Auditor de Contratos Públicos},
+	year = {2026},
+	version = {1.0.1},
+	institution = {Universidade de Santiago de Compostela},
+	url = {https://github.com/AlbertoQuian/auditor-contratos-publicos},
+	note = {Software}
+}
+```
+
 ## Autoría, proyectos y licencia
 
 Aplicación desarrollada en coautoría por **Xoán Xosé Pardal Pérez** (autor principal) y **[Alberto Quian](https://albertoquian.github.io/)** (apoyo metodológico y técnico), en la **Universidade de Santiago de Compostela**.
