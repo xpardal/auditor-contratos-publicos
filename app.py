@@ -6,7 +6,9 @@
 # datos oficiales de contratación pública y gasto local en España.
 # Autor principal: Xoán Xosé Pardal Pérez.
 # Apoyo metodológico y técnico: Alberto Quian (https://albertoquian.github.io/).
-# Esta aplicación es parte de los proyectos de I+D+i: PID2024-156034OB-C22 y XornalIA (PDC2025-166024-I00).
+# Esta aplicación es parte de los proyectos de I+D+i:
+# - Inteligencia artificial en medios digitales en España: efectos y roles (PID2024-156034OB-C22).
+# - XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación (PDC2025-166024-I00).
 # Licencia: MIT (https://opensource.org/license/mit).
 # SPDX-License-Identifier: MIT
 # =============================================================================
@@ -97,7 +99,7 @@ MIT_LICENSE_URL = "https://opensource.org/license/mit"
 RESEARCH_PROJECTS_HTML = """
 <ul style="margin: .35rem 0 0 1.1rem; padding: 0;">
     <li><em>Inteligencia artificial en medios digitales en España: efectos y roles</em> (PID2024-156034OB-C22), financiado por MICIU/AEI/10.13039/501100011033 y “FEDER/UE”.</li>
-    <li><em>XornalIA</em> (PDC2025-166024-I00 - Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación), financiado por el Ministerio de Ciencia e Innovación y la Agencia Estatal de Investigación.</li>
+    <li><em>XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación</em> (PDC2025-166024-I00), financiado por el Ministerio de Ciencia e Innovación y la Agencia Estatal de Investigación.</li>
 </ul>
 """.strip()
 AUTHORS_LINE_HTML = (

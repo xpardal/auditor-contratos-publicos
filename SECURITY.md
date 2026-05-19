@@ -2,17 +2,17 @@
 
 ## Versiones soportadas
 
-| Versión | Soporte |
-|---------|---------|
-| 1.0.x   | ✅ activa |
-| < 1.0   | ❌ no soportada |
+| Versión | Soporte      |
+| ------- | ------------ |
+| 1.0.x   | activa       |
+| < 1.0   | no soportada |
 
 ## Cómo reportar una vulnerabilidad
 
 Si detectas una vulnerabilidad de seguridad en el Auditor de Contratos Públicos, **no la publiques en un *issue* público**. En su lugar:
 
 1. Abre un *Security Advisory* privado desde la pestaña **Security → Advisories** del repositorio en GitHub, **o**
-2. Envía un correo a la persona autora de contacto indicada en [`AUTHORS.md`](AUTHORS.md).
+2. Contacta con las personas mantenedoras mediante el canal interno disponible para el repositorio privado.
 
 Incluye, si es posible:
 

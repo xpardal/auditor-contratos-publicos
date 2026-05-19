@@ -3,7 +3,9 @@
 # Auditor de Contratos Públicos · Universidade de Santiago de Compostela
 # Lanzador: Linux, instalación de dependencias y arranque de Streamlit.
 # Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
-# Esta aplicación es parte de los proyectos de I+D+i: PID2024-156034OB-C22 y XornalIA (PDC2025-166024-I00).
+# Esta aplicación es parte de los proyectos de I+D+i:
+# - Inteligencia artificial en medios digitales en España: efectos y roles (PID2024-156034OB-C22).
+# - XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación (PDC2025-166024-I00).
 # Licencia: MIT (https://opensource.org/license/mit).
 # SPDX-License-Identifier: MIT
 # =============================================================================

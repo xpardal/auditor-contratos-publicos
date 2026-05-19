@@ -11,8 +11,8 @@ Este proyecto adopta el [Contributor Covenant v2.1](https://www.contributor-cove
 
 ## Cómo reportar
 
-Para denunciar un comportamiento inaceptable, escribe al equipo del proyecto a través del repositorio (issue privado o correo del autor principal en `AUTHORS.md`). Los avisos se tratarán con confidencialidad.
+Para denunciar un comportamiento inaceptable, contacta con las personas mantenedoras mediante el canal interno disponible para el repositorio privado. Los avisos se tratarán con confidencialidad.
 
 ## Atribución
 
-Texto adaptado del Contributor Covenant, versión 2.1. Disponible en https://www.contributor-covenant.org/version/2/1/code_of_conduct/.
+Texto adaptado del [Contributor Covenant, versión 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).

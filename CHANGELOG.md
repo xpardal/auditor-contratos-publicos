@@ -14,7 +14,7 @@ Todas las novedades relevantes de este proyecto se documentan en este archivo. E
 
 ### Documentación
 
-- Guía de uso, README, metadatos y cabeceras actualizados con el marco correcto: esta aplicación es parte de los proyectos de I+D+i PID2024-156034OB-C22 y XornalIA (PDC2025-166024-I00).
+- Guía de uso, README, metadatos y cabeceras actualizados con el marco correcto: esta aplicación es parte de los proyectos de I+D+i *Inteligencia artificial en medios digitales en España: efectos y roles* (PID2024-156034OB-C22) y *XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación* (PDC2025-166024-I00).
 - Proyecto preparado para repositorio privado: se documenta qué debe subirse y qué queda excluido por `.gitignore`.
 
 ## [1.0.0] - 2026-05-14
@@ -35,5 +35,5 @@ Todas las novedades relevantes de este proyecto se documentan en este archivo. E
 
 ### Notas
 
-- Esta aplicación es parte de los proyectos de I+D+i PID2024-156034OB-C22 y XornalIA (PDC2025-166024-I00).
+- Esta aplicación es parte de los proyectos de I+D+i *Inteligencia artificial en medios digitales en España: efectos y roles* (PID2024-156034OB-C22) y *XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación* (PDC2025-166024-I00).
 - Coautoría: Xoán Xosé Pardal Pérez (autor principal) y Alberto Quian (apoyo metodológico y técnico).

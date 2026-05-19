@@ -25,7 +25,7 @@ Antes de una publicación formal conviene ejecutar en el entorno virtual:
 
 ```bash
 python -m pip list
-python -m pip show streamlit pandas pdfplumber duckdb pyarrow openpyxl lxml certifi plotly jinja2 pytest
+python -m pip show streamlit pandas pdfplumber duckdb pyarrow openpyxl xlrd lxml certifi plotly kaleido jinja2 reportlab pytest
 ```
 
 Este documento no sustituye asesoramiento legal; sirve como inventario práctico para transparencia del repositorio.

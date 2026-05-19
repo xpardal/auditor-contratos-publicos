@@ -10,8 +10,9 @@ authors:
     family-names: "Quian"
     affiliation: "Universidade de Santiago de Compostela"
     website: "https://albertoquian.github.io/"
-abstract: "Herramienta local-first para detectar indicios estadísticos de fraccionamiento de contratos menores y analizar gasto público local español. Coautoría: Xoán Xosé Pardal Pérez (autor principal) y Alberto Quian (apoyo metodológico y técnico). Esta aplicación es parte de los proyectos de I+D+i 'Inteligencia artificial en medios digitales en España: efectos y roles' (PID2024-156034OB-C22) y XornalIA (PDC2025-166024-I00)."
+abstract: "Herramienta local-first para detectar indicios estadísticos de fraccionamiento de contratos menores y analizar gasto público local español. Coautoría: Xoán Xosé Pardal Pérez (autor principal) y Alberto Quian (apoyo metodológico y técnico). Esta aplicación es parte de los proyectos de I+D+i 'Inteligencia artificial en medios digitales en España: efectos y roles' (PID2024-156034OB-C22) y 'XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación' (PDC2025-166024-I00)."
 license: MIT
+repository-code: "https://github.com/AlbertoQuian/auditor-contratos-publicos"
 date-released: "2026-05-19"
 version: "1.0.1"
 keywords:

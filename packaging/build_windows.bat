@@ -5,7 +5,9 @@ REM Construye el binario distribuible para Windows usando PyInstaller.
 REM Ejecutar desde la raiz del repositorio.
 REM
 REM Autores: Xoan Xose Pardal Perez; Alberto Quian (apoyo metodologico y tecnico).
-REM Esta aplicacion es parte de los proyectos de I+D+i: PID2024-156034OB-C22 y XornalIA (PDC2025-166024-I00).
+REM Esta aplicacion es parte de los proyectos de I+D+i:
+REM - Inteligencia artificial en medios digitales en Espana: efectos y roles (PID2024-156034OB-C22).
+REM - XornalIA: Desarrollo, validacion y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicacion (PDC2025-166024-I00).
 REM Licencia: MIT (https://opensource.org/license/mit).
 REM SPDX-License-Identifier: MIT
 REM =============================================================================
