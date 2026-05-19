@@ -1,6 +1,6 @@
 # 🕵️ Auditor de Contratos Públicos
 
-> **TFG — Periodismo de Datos.** Herramienta local-first para detectar
+> Herramienta local-first para detectar
 > fraccionamiento de contratos menores ("pitufeo") y analizar el gasto
 > de los entes locales españoles. Pensada para procesar **millones de
 > partidas presupuestarias** sin enviar nada a la nube.
