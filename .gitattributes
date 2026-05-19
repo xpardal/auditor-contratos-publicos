@@ -1,0 +1,20 @@
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.command text eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.cff text eol=lf
+
+*.docx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.parquet binary
+*.accdb binary

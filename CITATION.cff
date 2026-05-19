@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "Si usas esta herramienta en un trabajo académico, periodístico o docente, cita este software."
+title: "Auditor de Contratos Públicos"
+type: software
+authors:
+  - given-names: "Xoán Xosé"
+    family-names: "Pardal Pérez"
+    affiliation: "Universidade de Santiago de Compostela"
+  - given-names: "Alberto"
+    family-names: "Quian"
+    affiliation: "Universidade de Santiago de Compostela"
+    website: "https://albertoquian.github.io/"
+abstract: "Herramienta local-first para detectar indicios estadísticos de fraccionamiento de contratos menores y analizar gasto público local español. Coautoría: Xoán Xosé Pardal Pérez (autor principal) y Alberto Quian (apoyo metodológico y técnico). Esta aplicación es parte de los proyectos de I+D+i 'Inteligencia artificial en medios digitales en España: efectos y roles' (PID2024-156034OB-C22) y XornalIA (PDC2025-166024-I00)."
+license: MIT
+date-released: "2026-05-19"
+version: "1.0.1"
+keywords:
+  - contratación pública
+  - periodismo de datos
+  - contratos menores
+  - fraccionamiento
+  - transparencia

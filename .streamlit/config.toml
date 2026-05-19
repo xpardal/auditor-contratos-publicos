@@ -1,0 +1,4 @@
+[server]
+# Permite seleccionar CSV/ACCDB grandes desde el navegador local.
+# Los datos se guardan en data/uploads/ (ignorado por Git).
+maxUploadSize = 1024

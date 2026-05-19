@@ -1,0 +1,21 @@
+# Auditor de Contratos Públicos · Universidade de Santiago de Compostela
+# Dependencias de desarrollo (no necesarias para ejecutar la app).
+# Instalar solo si vas a contribuir, ejecutar la suite de tests o construir
+# binarios distribuibles.
+#
+# Uso:
+#   pip install -r requirements.txt
+#   pip install -r requirements-dev.txt
+#
+# Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
+# Esta aplicación es parte de los proyectos de I+D+i: PID2024-156034OB-C22 y XornalIA (PDC2025-166024-I00).
+# Licencia: MIT (https://opensource.org/license/mit).
+# SPDX-License-Identifier: MIT
+
+# --- Tests ---
+pytest>=8.0
+
+# --- Empaquetado binario opcional (PyInstaller) ---
+# Solo se usa desde scripts/build_binary_*.{sh,bat} y desde el workflow
+# .github/workflows/release.yml. NO se necesita para uso normal de la app.
+pyinstaller>=6.6

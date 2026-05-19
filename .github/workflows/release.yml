@@ -1,0 +1,100 @@
+# =============================================================================
+# Auditor de Contratos Públicos · Universidade de Santiago de Compostela
+# Workflow: build de binarios distribuibles multi-OS al publicar un tag vX.Y.Z.
+# Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
+# Proyecto PID2024-156034OB-C22, financiado por MICIU/AEI/10.13039/501100011033 y "FEDER/UE".
+# Licencia: MIT (https://opensource.org/license/mit).
+# SPDX-License-Identifier: MIT
+# =============================================================================
+
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            artifact: auditor-contratos-macos
+            archive_cmd: tar -czf
+            archive_ext: tar.gz
+          - os: ubuntu-latest
+            artifact: auditor-contratos-linux
+            archive_cmd: tar -czf
+            archive_ext: tar.gz
+          - os: windows-latest
+            artifact: auditor-contratos-windows
+            archive_cmd: 7z a
+            archive_ext: zip
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Build binary (PyInstaller)
+        run: pyinstaller packaging/auditor.spec --clean --noconfirm
+
+      - name: Package artifact (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cd dist
+          ${{ matrix.archive_cmd }} ../${{ matrix.artifact }}.${{ matrix.archive_ext }} auditor-contratos
+
+      - name: Package artifact (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cd dist
+          Compress-Archive -Path auditor-contratos -DestinationPath ../${{ matrix.artifact }}.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.${{ matrix.archive_ext }}
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: ls -R artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false

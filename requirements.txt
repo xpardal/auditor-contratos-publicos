@@ -1,0 +1,26 @@
+# Auditor de Contratos Públicos · Universidade de Santiago de Compostela
+# Dependencias de ejecución (runtime) para usuarios finales.
+# Las dependencias de desarrollo y pruebas viven en requirements-dev.txt.
+#
+# Nota: la conversión directa de archivos .accdb requiere `mdbtools`, que es
+# una dependencia del sistema operativo y no se puede instalar con pip.
+# macOS: brew install mdbtools · Debian/Ubuntu: sudo apt install mdbtools
+#
+# Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
+# Esta aplicación es parte de los proyectos de I+D+i: PID2024-156034OB-C22 y XornalIA (PDC2025-166024-I00).
+# Licencia: MIT (https://opensource.org/license/mit).
+# SPDX-License-Identifier: MIT
+
+streamlit>=1.36
+pandas>=2.2
+pdfplumber>=0.11
+duckdb>=1.0
+pyarrow>=16.0
+openpyxl>=3.1
+xlrd>=2.0.1
+lxml>=5.2
+certifi>=2024.0
+plotly>=5.22
+kaleido>=1.0.0
+jinja2>=3.1
+reportlab>=4.0
