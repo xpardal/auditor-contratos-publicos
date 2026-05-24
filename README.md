@@ -2,7 +2,7 @@
 
 > Herramienta local-first para que periodistas, estudiantes e investigadores puedan explorar contratación pública española, detectar indicios estadísticos de fraccionamiento de contratos menores y generar informes reutilizables sin enviar datos a servicios externos.
 
-[![tests](https://img.shields.io/badge/tests-53%20passed-brightgreen)](tests/)
+[![tests](https://img.shields.io/badge/tests-57%20passed-brightgreen)](tests/)
 [![python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![platform](https://img.shields.io/badge/macOS%20%7C%20Linux%20%7C%20Windows-supported-lightgrey)](#compatibilidad)
@@ -10,8 +10,9 @@
 ## Qué permite hacer
 
 - Descargar y procesar contratos menores publicados en la Plataforma de Contratación del Sector Público (PLACSP).
+- Comprobar cobertura municipal en PLACSP para distinguir entre contratos ubicados en un municipio y ayuntamientos que aparecen como órgano contratante.
 - Consultar liquidaciones presupuestarias del Tribunal de Cuentas mediante DuckDB, sin cargar millones de filas en memoria.
-- Analizar archivos sueltos PDF, CSV o Excel con patrones forenses básicos.
+- Convertir `.accdb` del Tribunal de Cuentas de forma acotada, con tiempo máximo por tabla y limpieza de CSV parcial si `mdbtools` falla.
 - Detectar agrupaciones de contratos por adjudicatario, órgano, tipo de contrato y año fiscal.
 - Visualizar relaciones, importes, series temporales, concentración de gasto y distribución territorial.
 - Exportar informes HTML/PDF, tablas CSV y gráficos PNG para redacción, docencia o revisión académica.
@@ -54,7 +55,6 @@ En Windows se recomienda abrir el `.accdb` con Microsoft Access o LibreOffice Ba
 | --- | --- | --- |
 | PLACSP | Contratos menores `.atom` descargados o cargados localmente | Radar, red de relaciones, mapas, informes HTML/PDF, CSV y PNG |
 | Tribunal de Cuentas | CSV o `.accdb` convertido a CSV | Rankings presupuestarios, detalle por entidad y descarga CSV |
-| Archivo individual | PDF, CSV o Excel | Escáner de patrones; radar si hay columnas estructuradas suficientes |
 
 Las descargas y subidas locales se guardan en `data/`, ignorado por Git. Cada descarga oficial genera un manifiesto JSON con fecha, URL y archivos creados para mantener trazabilidad metodológica.
 
@@ -88,7 +88,6 @@ Los directorios `.venv/`, `.cache/`, `data/`, `exports/`, `reports/` y los archi
 | --- | --- | --- | --- |
 | Streamlit, pandas, DuckDB, Plotly, PDF | Sí | Sí | Sí |
 | Descarga PLACSP y URL directa | Sí | Sí | Sí |
-| Análisis CSV, Excel y PDF | Sí | Sí | Sí |
 | Conversión `.accdb` con `mdbtools` | Sí | Sí | No práctico; usar Access/LibreOffice |
 
 ## Estructura del repositorio
@@ -143,13 +142,12 @@ Si usas este repositorio, la aplicación o parte de su código en un trabajo aca
 }
 ```
 
-## Autoría, proyectos y licencia
+## Autoría, proyecto y licencia
 
 Aplicación desarrollada en coautoría por **Xoán Xosé Pardal Pérez** (autor principal) y **[Alberto Quian](https://albertoquian.github.io/)** (apoyo metodológico y técnico), en la **Universidade de Santiago de Compostela**.
 
-Esta aplicación es parte de los proyectos de I+D+i:
+Esta aplicación es parte del proyecto de I+D+i:
 
-- *Inteligencia artificial en medios digitales en España: efectos y roles* (PID2024-156034OB-C22), financiado por MICIU/AEI/10.13039/501100011033 y “FEDER/UE”.
 - *XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación* (PDC2025-166024-I00), financiado por el Ministerio de Ciencia e Innovación y la Agencia Estatal de Investigación.
 
 El código se publica bajo licencia MIT. Consulta [LICENSE](LICENSE), [AUTHORS.md](AUTHORS.md), [CITATION.cff](CITATION.cff) y [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) para detalles de reutilización, cita académica y licencias de dependencias.

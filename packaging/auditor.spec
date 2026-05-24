@@ -10,8 +10,7 @@
 # El binario resultante queda en dist/auditor-contratos/.
 #
 # Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
-# Esta aplicacion es parte de los proyectos de I+D+i:
-# - Inteligencia artificial en medios digitales en Espana: efectos y roles (PID2024-156034OB-C22).
+# Esta aplicacion es parte del proyecto de I+D+i:
 # - XornalIA: Desarrollo, validacion y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicacion (PDC2025-166024-I00).
 # Licencia: MIT (https://opensource.org/license/mit).
 # SPDX-License-Identifier: MIT

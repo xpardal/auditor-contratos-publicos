@@ -2,8 +2,7 @@
 # Auditor de Contratos Públicos · Universidade de Santiago de Compostela
 # Pruebas: informes descargables y tablas CSV.
 # Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
-# Esta aplicación es parte de los proyectos de I+D+i:
-# - Inteligencia artificial en medios digitales en España: efectos y roles (PID2024-156034OB-C22).
+# Esta aplicación es parte del proyecto de I+D+i:
 # - XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación (PDC2025-166024-I00).
 # Licencia: MIT (https://opensource.org/license/mit).
 # SPDX-License-Identifier: MIT
@@ -92,7 +91,7 @@ def test_render_informe_pdf_no_incluye_pie_de_licencia_o_tfg():
     with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
         texto = "\n".join(page.extract_text() or "" for page in pdf.pages)
     assert "Software publicado bajo licencia MIT" not in texto
-    assert "PID2024-156034OB-C22" not in texto
+    assert "XornalIA" not in texto
     assert "TFG Periodismo" not in texto
 
 

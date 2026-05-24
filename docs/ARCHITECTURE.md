@@ -94,4 +94,4 @@ flowchart LR
 
 El repositorio no debe incluir descargas completas, cachés, entornos virtuales ni bases pesadas. `.gitignore` excluye `data/`, `.cache/`, `.venv/`, `__pycache__/`, `.pytest_cache/`, `.accdb` y dumps voluminosos. Las fuentes reales se descargan desde la app o se cargan localmente por el investigador.
 
-La app mantiene dos vías de entrada: selector de archivo del navegador para `.atom`, CSV, Excel, PDF y `.accdb`; y campos de ruta local para carpetas completas o ficheros muy grandes. Los archivos seleccionados se copian a `data/uploads/`, carpeta ignorada por Git.
+La app mantiene dos vías de entrada: selector de archivo del navegador para `.atom`, CSV y `.accdb`; y campos de ruta local para carpetas completas o ficheros muy grandes. Los archivos seleccionados se copian a `data/uploads/`, carpeta ignorada por Git.

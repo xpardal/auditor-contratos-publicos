@@ -6,8 +6,7 @@
 # datos oficiales de contratación pública y gasto local en España.
 # Autor principal: Xoán Xosé Pardal Pérez.
 # Apoyo metodológico y técnico: Alberto Quian (https://albertoquian.github.io/).
-# Esta aplicación es parte de los proyectos de I+D+i:
-# - Inteligencia artificial en medios digitales en España: efectos y roles (PID2024-156034OB-C22).
+# Esta aplicación es parte del proyecto de I+D+i:
 # - XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación (PDC2025-166024-I00).
 # Licencia: MIT (https://opensource.org/license/mit).
 # SPDX-License-Identifier: MIT
@@ -19,13 +18,12 @@ AUDITOR DE CONTRATOS PÚBLICOS
 Herramienta local-first para detectar fraccionamiento de contratos
 ("pitufeo") y analizar el gasto público de los entes locales españoles.
 
-Tres fuentes de datos unificadas:
+Dos fuentes de datos unificadas:
 
   1) PLACSP        — Plataforma de Contratación del Sector Público
                      (carpeta de archivos .atom, p. ej. 1100/año).
   2) Tribunal de Cuentas — Liquidaciones presupuestarias de TODOS los
                      entes locales (1,19 M filas) consultadas con DuckDB.
-  3) Archivos sueltos — PDF / CSV / Excel para análisis forense puntual.
 
 Ejecutar:
     streamlit run app.py
@@ -37,33 +35,27 @@ import platform
 import re
 import shutil
 import time
+import unicodedata
 from pathlib import Path
 
 import pandas as pd
-import pdfplumber
 import streamlit as st
 
 from core.analysis import (
-    analizar_texto_por_pagina,
-    detectar_banderas,
     ejecutar_radar,
     parsear_fechas_mixtas,
-    pintar_filas_banderas,
 )
 from core.constants import (
     LIMITE_OBRAS,
     LIMITE_SERVICIOS,
-    PATRONES,
     PROVINCIAS_GALICIA,
-    inferir_geografia,
-    inferir_municipio,
 )
 from core.downloaders import (
     DEFAULT_PLACSP_MENORES_URL,
     descargar_placsp_menores,
     descargar_url_directa,
 )
-from core.money import formatear_euros, limpiar_dinero
+from core.money import formatear_euros
 from core.placsp import cargar_placsp, filtrar_por_organos, filtrar_por_texto_organismo
 from core.pdf_report import render_informe_pdf
 from core.report import (
@@ -75,6 +67,7 @@ from core.report import (
 from core.tribunal_cuentas import (
     detalle_partidas_entidad,
     exportar_accdb_a_csv,
+    listar_tablas_accdb,
     mdbtools_disponible,
     ranking_gasto_capitulo,
 )
@@ -98,7 +91,6 @@ from core.visual import (
 MIT_LICENSE_URL = "https://opensource.org/license/mit"
 RESEARCH_PROJECTS_HTML = """
 <ul style="margin: .35rem 0 0 1.1rem; padding: 0;">
-    <li><em>Inteligencia artificial en medios digitales en España: efectos y roles</em> (PID2024-156034OB-C22), financiado por MICIU/AEI/10.13039/501100011033 y “FEDER/UE”.</li>
     <li><em>XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación</em> (PDC2025-166024-I00), financiado por el Ministerio de Ciencia e Innovación y la Agencia Estatal de Investigación.</li>
 </ul>
 """.strip()
@@ -175,6 +167,89 @@ def _guardar_archivo_subido(archivo, carpeta_destino: str | Path) -> Path:
 
 def _guardar_archivos_subidos(archivos, carpeta_destino: str | Path) -> list[Path]:
     return [_guardar_archivo_subido(archivo, carpeta_destino) for archivo in archivos]
+
+
+def _normalizar_busqueda(texto: object) -> str:
+    valor = unicodedata.normalize("NFKD", str(texto or ""))
+    return "".join(c for c in valor if not unicodedata.combining(c)).casefold()
+
+
+def _serie_contiene(serie: pd.Series, consulta: str) -> pd.Series:
+    consulta_norm = _normalizar_busqueda(consulta)
+    return serie.fillna("").map(_normalizar_busqueda).str.contains(consulta_norm, regex=False, na=False)
+
+
+def _mostrar_diagnostico_cobertura_placsp(df: pd.DataFrame) -> None:
+    with st.expander("🧭 Diagnóstico de cobertura municipal", expanded=False):
+        st.caption(
+            "Comprueba si un ayuntamiento/concello aparece como órgano contratante "
+            "en los .atom cargados o solo como municipio de ubicación. Si no aparece "
+            "aquí, la app no lo está ocultando: no está en el lote PLACSP cargado con "
+            "esa denominación. Para auditorías municipales conviene una descarga "
+            "profunda: algunos órganos no aparecen hasta pasadas más de 100 páginas "
+            "del feed."
+        )
+        organos_norm_total = df.get("Organo", pd.Series(index=df.index, dtype=object)).fillna("").map(_normalizar_busqueda)
+        mask_municipal_total = organos_norm_total.str.contains(
+            r"ayuntamiento|concello|ajuntament|ayuntamento|udal|udala|alcaldia|alcaldía|junta de gobierno",
+            regex=True,
+            na=False,
+        )
+        fecha_min = df["Fecha"].dropna().min() if "Fecha" in df.columns and df["Fecha"].notna().any() else "n/d"
+        fecha_max = df["Fecha"].dropna().max() if "Fecha" in df.columns and df["Fecha"].notna().any() else "n/d"
+        col_rango, col_munis, col_organos, col_municipales = st.columns(4)
+        col_rango.metric("Rango de adjudicación", f"{fecha_min} / {fecha_max}")
+        col_munis.metric("Municipios en el lote", f"{df['Municipio'].nunique() if 'Municipio' in df else 0:,}")
+        col_organos.metric("Órganos en el lote", f"{df['Organo'].nunique() if 'Organo' in df else 0:,}")
+        col_municipales.metric("Órganos municipales", f"{df.loc[mask_municipal_total, 'Organo'].nunique() if 'Organo' in df else 0:,}")
+
+        consulta = st.text_input(
+            "Municipio o ayuntamiento a comprobar",
+            value="",
+            placeholder="Ej.: Santiago de Compostela, Vigo, A Coruña...",
+            key="placsp_diagnostico_cobertura",
+        )
+        if not consulta.strip():
+            return
+
+        columnas_base = [c for c in ["Organo", "Municipio", "Provincia", "CCAA", "Fecha"] if c in df.columns]
+        mask_municipio = _serie_contiene(df.get("Municipio", pd.Series(index=df.index, dtype=object)), consulta)
+        mask_organo = _serie_contiene(df.get("Organo", pd.Series(index=df.index, dtype=object)), consulta)
+        df_municipio = df[mask_municipio]
+        df_organo = df[mask_organo]
+        df_municipal = df[mask_municipio & mask_municipal_total]
+
+        col_a, col_b, col_c = st.columns(3)
+        col_a.metric("Contratos ubicados ahí", f"{len(df_municipio):,}")
+        col_b.metric("Órganos cuyo nombre coincide", f"{df_organo['Organo'].nunique() if 'Organo' in df_organo else 0:,}")
+        col_c.metric("Órganos municipales ubicados ahí", f"{df_municipal['Organo'].nunique() if 'Organo' in df_municipal else 0:,}")
+
+        if df_municipio.empty and df_organo.empty:
+            st.warning(
+                "No hay coincidencias en los datos PLACSP cargados. Amplía la descarga "
+                "o comprueba si esa entidad publica sus contratos menores en otra plataforma."
+            )
+            return
+        if not df_municipio.empty and df_municipal.empty:
+            st.info(
+                "Sí hay contratos ubicados en ese municipio, pero no aparece un órgano "
+                "municipal con esa ubicación en este lote."
+            )
+
+        if not df_organo.empty:
+            st.markdown("#### Órganos coincidentes por nombre")
+            st.dataframe(
+                df_organo[columnas_base].drop_duplicates().head(50),
+                width="stretch",
+                hide_index=True,
+            )
+        if not df_municipio.empty:
+            st.markdown("#### Órganos ubicados en el municipio")
+            st.dataframe(
+                df_municipio[columnas_base].drop_duplicates().head(50),
+                width="stretch",
+                hide_index=True,
+            )
 
 
 # =============================================================================
@@ -539,7 +614,6 @@ with st.sidebar:
         [
             "🌐 PLACSP (carpeta .atom)",
             "🏛️ Tribunal de Cuentas (CSV/.accdb)",
-            "📄 Archivo individual (PDF/CSV/Excel)",
             "❓ Guía de uso",
         ],
         label_visibility="collapsed",
@@ -594,7 +668,7 @@ if fuente.startswith("🌐"):
                 help=(
                     "Cada página del feed contiene un lote de contratos en orden "
                     "cronológico inverso. Cuanto mayor sea el número de páginas, "
-                    "más histrórico (más antigüedad) se descargará."
+                    "más histórico (más antigüedad) se descargará."
                 ),
             )
         with col_d3:
@@ -687,6 +761,7 @@ if fuente.startswith("🌐"):
 
     df_bruto = st.session_state.get("placsp_df", pd.DataFrame())
     if not df_bruto.empty:
+        _mostrar_diagnostico_cobertura_placsp(df_bruto)
         df_filtrado = filtrar_por_organos(df_bruto, palabras.split(",")) if palabras else df_bruto
 
         st.markdown("### 🎯 Filtro de precisión")
@@ -940,9 +1015,9 @@ elif fuente.startswith("🏛️"):
     )
     st.caption(
         "Salida de este flujo: ranking de entidades, tabla descargable, detalle "
-        "por entidad y gráficos de ranking. El radar de fraccionamiento y el "
-        "informes y descargas completos se activan cuando hay contratos individuales "
-        "con adjudicatario, importe y año fiscal (PLACSP o CSV/Excel individual)."
+        "por entidad y gráficos de ranking. El radar de fraccionamiento se aplica "
+        "sobre datos contractuales de PLACSP, donde constan adjudicatario, importe "
+        "y año fiscal."
     )
 
     tab_csv, tab_accdb, tab_descarga = st.tabs([
@@ -1191,10 +1266,41 @@ elif fuente.startswith("🏛️"):
                 value=st.session_state.get("tribunal_accdb_destino", str(DEFAULT_TRIBUNAL_DIR / "accdb_export")),
             )
             _crear_carpeta_boton(destino, key="crear_destino_accdb")
-            if st.button("🔧 Convertir todas las tablas"):
+            solo_tablas_necesarias = st.checkbox(
+                "Convertir solo tablas necesarias para el ranking",
+                value=True,
+                help=(
+                    "Evita exportar tablas accesorias del .accdb. Para el flujo de "
+                    "la app bastan tb_economica y tb_inventario."
+                ),
+            )
+            timeout_tabla_min = st.number_input(
+                "Tiempo máximo por tabla (min)",
+                min_value=1,
+                max_value=120,
+                value=5,
+                step=1,
+                help="Si mdbtools se queda bloqueado con una tabla, la app cancela esa conversión y muestra el error.",
+            )
+            if st.button("🔧 Convertir tablas"):
                 try:
                     if not ruta_accdb or not Path(ruta_accdb).exists():
                         raise FileNotFoundError("Indica una ruta válida al archivo .accdb/.mdb.")
+                    tablas_accdb = None
+                    if solo_tablas_necesarias:
+                        disponibles = listar_tablas_accdb(ruta_accdb)
+                        indice_tablas = {tabla.casefold(): tabla for tabla in disponibles}
+                        tablas_accdb = [
+                            indice_tablas[nombre]
+                            for nombre in ("tb_economica", "tb_inventario")
+                            if nombre in indice_tablas
+                        ]
+                        if len(tablas_accdb) < 2:
+                            encontradas = ", ".join(disponibles[:20]) or "ninguna"
+                            raise RuntimeError(
+                                "No se encontraron tb_economica y tb_inventario en el ACCDB. "
+                                f"Tablas detectadas: {encontradas}"
+                            )
                     estado = st.empty()
                     barra_accdb = st.progress(0.0, text="Preparando conversión…")
                     inicio_conversion = time.monotonic()
@@ -1230,7 +1336,11 @@ elif fuente.startswith("🏛️"):
                         )
 
                     creados = exportar_accdb_a_csv(
-                        ruta_accdb, destino, progreso=_progreso_accdb
+                        ruta_accdb,
+                        destino,
+                        tablas=tablas_accdb,
+                        progreso=_progreso_accdb,
+                        timeout_tabla=int(timeout_tabla_min * 60),
                     )
                     barra_accdb.progress(1.0, text="✅ Conversión completada")
                     estado.empty()
@@ -1293,9 +1403,9 @@ elif fuente.startswith("🏛️"):
 
 
 # =============================================================================
-# RUTA 4 — GUÍA DE USO INTEGRADA
+# RUTA 3 — GUÍA DE USO INTEGRADA
 # =============================================================================
-elif fuente.startswith("❓"):
+else:
     st.subheader("Guía de uso de la herramienta")
     guia_path = Path(__file__).parent / "docs" / "GUIA_USO.md"
     if not guia_path.exists():
@@ -1341,188 +1451,6 @@ elif fuente.startswith("❓"):
         "Sistema detectado: "
         f"**{platform.system()} {platform.release()}** · Python {platform.python_version()}"
     )
-
-
-# =============================================================================
-# RUTA 3 — ARCHIVO INDIVIDUAL (PDF / CSV / Excel)
-# =============================================================================
-else:
-    st.subheader("Análisis forense de archivo suelto")
-
-    st.info(
-        "💡 **Mejor con CSV o Excel.** El análisis de PDF detecta patrones "
-        "(importes, NIFs, fechas, palabras clave) sobre texto extraído, pero "
-        "**no reconstruye tablas estructuradas**: en PDFs escaneados, con "
-        "columnas complejas o sin capa de texto los resultados pueden ser "
-        "parciales. Si dispones del mismo informe en CSV/Excel, úsalo: el "
-        "auditor podrá entonces aplicar el radar de fraccionamiento completo."
-    )
-
-    archivo = st.file_uploader(
-        "Sube un PDF, CSV o Excel",
-        type=["pdf", "csv", "xlsx", "xls"],
-    )
-
-    col1, col2 = st.columns(2)
-    with col1:
-        limite_paginas = st.slider("Máx. páginas a leer (PDF)", 10, 500, 50)
-    with col2:
-        filas_saltar = st.number_input("Filas iniciales a ignorar (CSV/Excel)", 0, 20, 0)
-
-    filtros_disp = st.multiselect(
-        "Patrones a buscar",
-        options=list(PATRONES.keys()),
-        default=["Importes (€)"],
-    )
-    filtros_activos = {k: (k in filtros_disp) for k in PATRONES}
-
-    if archivo:
-        nombre_ext = archivo.name.lower()
-        df_resultados = pd.DataFrame()
-        df_input = pd.DataFrame()
-
-        # --- PDF ---
-        if nombre_ext.endswith(".pdf"):
-            try:
-                with pdfplumber.open(archivo) as pdf:
-                    total = len(pdf.pages)
-                    leer = min(total, limite_paginas)
-                    barra = st.progress(0.0)
-                    textos: dict[int, str] = {}
-                    for i in range(leer):
-                        t = pdf.pages[i].extract_text()
-                        if t:
-                            textos[i + 1] = t
-                        barra.progress((i + 1) / leer)
-                st.success(f"✅ Leídas {leer} de {total} páginas.")
-                df_resultados = analizar_texto_por_pagina(textos, filtros_activos)
-            except Exception as e:
-                st.error(f"❌ Error al procesar el PDF: {e}")
-
-        # --- CSV / Excel ---
-        elif nombre_ext.endswith((".csv", ".xlsx", ".xls")):
-            try:
-                if nombre_ext.endswith(".csv"):
-                    df_input = pd.read_csv(archivo, sep=None, engine="python", skiprows=filas_saltar)
-                else:
-                    df_input = pd.read_excel(archivo, skiprows=filas_saltar)
-                st.success(f"✅ {len(df_input):,} filas, {len(df_input.columns)} columnas.")
-
-                pal_emp = ["adjudicatario", "empresa", "contratista", "tercero", "nombre", "proveedor"]
-                pal_din = ["importe", "prezo", "precio", "total", "adxudicacion", "orzamento", "presupuesto"]
-                pal_fecha = ["fecha", "date", "data", "fiscal"]
-                pal_organo = ["organo", "órgano", "entidad", "ayuntamiento", "concello", "administracion"]
-                pal_tipo = ["tipo", "clase", "categoria", "categoría"]
-                cols_emp = [c for c in df_input.columns if any(p in str(c).lower() for p in pal_emp)]
-                cols_din = [c for c in df_input.columns if any(p in str(c).lower() for p in pal_din)]
-                cols_fecha = [c for c in df_input.columns if any(p in str(c).lower() for p in pal_fecha)]
-                cols_organo = [c for c in df_input.columns if any(p in str(c).lower() for p in pal_organo)]
-                cols_tipo = [c for c in df_input.columns if any(p in str(c).lower() for p in pal_tipo)]
-
-                # Construye df_resultados para escáner
-                filas: list[dict] = []
-                for col in cols_din:
-                    serie_num = df_input[col].apply(limpiar_dinero)
-                    for idx, val in df_input.loc[serie_num.notna(), col].items():
-                        ctx = " | ".join(df_input.loc[idx].astype(str).tolist())[:200]
-                        for nombre, activo in filtros_activos.items():
-                            if not activo:
-                                continue
-                            for m in re.finditer(PATRONES[nombre], f"{val} €"):
-                                filas.append({
-                                    "Localizacion": f"Fila {idx + 2}",
-                                    "Tipo": nombre,
-                                    "Valor": m.group(),
-                                    "Contexto": ctx,
-                                })
-                df_resultados = pd.DataFrame(filas)
-
-                # Normaliza para el radar
-                if cols_emp and cols_din:
-                    df_input = df_input.rename(columns={cols_emp[0]: "Adjudicatario", cols_din[0]: "Importe_euros"})
-                    df_input["Importe_euros"] = df_input["Importe_euros"].apply(limpiar_dinero)
-                    df_input["_Adjudicatario_Radar"] = df_input["Adjudicatario"].where(
-                        df_input["Adjudicatario"].notna()
-                        & (df_input["Adjudicatario"].astype(str).str.strip() != "")
-                    )
-                    df_input["Tipo_Contrato"] = (
-                        df_input[cols_tipo[0]].astype(str)
-                        if cols_tipo and cols_tipo[0] in df_input.columns
-                        else "Servicios"
-                    )
-                    df_input["Organo"] = (
-                        df_input[cols_organo[0]].astype(str)
-                        if cols_organo and cols_organo[0] in df_input.columns
-                        else "Archivo local"
-                    )
-                    if "Provincia" not in df_input.columns or "CCAA" not in df_input.columns:
-                        geografia = df_input["Organo"].apply(inferir_geografia)
-                        if "Provincia" not in df_input.columns:
-                            df_input["Provincia"] = geografia.apply(lambda valor: valor[0])
-                        if "CCAA" not in df_input.columns:
-                            df_input["CCAA"] = geografia.apply(lambda valor: valor[1])
-                    if "Municipio" not in df_input.columns:
-                        df_input["Municipio"] = df_input["Organo"].apply(inferir_municipio)
-                    if cols_fecha and cols_fecha[0] in df_input.columns:
-                        fechas = parsear_fechas_mixtas(df_input[cols_fecha[0]])
-                        df_input["Fecha"] = fechas
-                        df_input["Año_Fiscal"] = fechas.dt.year.astype("Int64")
-                    else:
-                        df_input["Año_Fiscal"] = pd.NA
-            except Exception as e:
-                st.error(f"❌ Error al leer la tabla: {e}")
-
-        # --- Resultados del escáner ---
-        if not df_resultados.empty:
-            st.markdown("---")
-            st.header("🔍 Escáner de patrones")
-            df_b = detectar_banderas(df_resultados)
-            alertas = df_b[df_b["Bandera"] != "OK"] if "Bandera" in df_b.columns else pd.DataFrame()
-            if not alertas.empty:
-                st.warning(f"⚠️ {len(alertas)} importes con banderas rojas.")
-                st.dataframe(
-                    alertas.style.apply(pintar_filas_banderas, axis=1),
-                    width="stretch",
-                )
-            else:
-                st.success("✅ Ningún importe roza los límites.")
-            with st.expander("Ver todos los hallazgos"):
-                st.dataframe(df_b, width="stretch")
-
-        # --- Radar para CSV/Excel con adjudicatario, importe y fecha ---
-        columnas_radar = {"_Adjudicatario_Radar", "Importe_euros", "Año_Fiscal"}
-        if not df_input.empty and columnas_radar.issubset(df_input.columns):
-            radar_archivo = ejecutar_radar(df_input, min_contratos=min_contratos)
-            if radar_archivo.empty:
-                if df_input["Año_Fiscal"].isna().all():
-                    st.info("El radar necesita una columna de fecha o año fiscal para agrupar contratos.")
-            else:
-                st.markdown("---")
-                st.header("🦊 Radar del archivo cargado")
-                _mostrar_resumen_radar(radar_archivo)
-                alertas_archivo = radar_archivo[radar_archivo["Es_Alerta"]]
-                if alertas_archivo.empty:
-                    st.success("✅ Sin acumulaciones sospechosas en este archivo.")
-                    tabla_radar = radar_archivo
-                else:
-                    st.warning(f"⚠️ {len(alertas_archivo)} grupos con señales de fraccionamiento.")
-                    tabla_radar = alertas_archivo if mostrar_solo_alertas else radar_archivo
-                st.dataframe(
-                    tabla_radar[_columnas_radar_visibles(tabla_radar)],
-                    width="stretch",
-                )
-                _mostrar_ficha_caso(
-                    radar_archivo,
-                    df_input,
-                    "Caso del archivo a revisar",
-                )
-                _mostrar_visualizaciones_forenses(
-                    radar_archivo,
-                    df_input,
-                    f"Informe archivo · {archivo.name}",
-                )
-
-
 # =============================================================================
 # PIE
 # =============================================================================
@@ -1547,11 +1475,11 @@ st.markdown(
         color: #1a202c;
     ">
       <div style="font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: #4a5568; margin-bottom: .35rem;">
-                Autoría · Institución · Proyectos · Licencia
+                Autoría · Institución · Proyecto · Licencia
       </div>
       <div><strong>Autores:</strong> {AUTHORS_LINE_HTML}.</div>
       <div><strong>Institución:</strong> Universidade de Santiago de Compostela.</div>
-            <div><strong>Esta aplicación es parte de los proyectos de I+D+i:</strong> {RESEARCH_PROJECTS_HTML}</div>
+            <div><strong>Esta aplicación es parte del proyecto de I+D+i:</strong> {RESEARCH_PROJECTS_HTML}</div>
       <div><strong>Licencia:</strong> código libre <a href=\"{MIT_LICENSE_URL}\" target=\"_blank\">MIT</a>.</div>
     </div>
     """,

@@ -22,7 +22,7 @@ Pasos mínimos para reproducir el problema:
 - Sistema operativo y versión:
 - Python (`python3 --version`):
 - Versión del Auditor (commit o tag):
-- Fuente de datos usada (PLACSP, Tribunal de Cuentas, archivo individual):
+- Fuente de datos usada (PLACSP o Tribunal de Cuentas):
 
 ## Logs y capturas
 

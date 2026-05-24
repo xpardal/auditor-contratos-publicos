@@ -2,8 +2,7 @@
 # Auditor de Contratos Públicos · Universidade de Santiago de Compostela
 # Pruebas: normalización de fechas PLACSP.
 # Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
-# Esta aplicación es parte de los proyectos de I+D+i:
-# - Inteligencia artificial en medios digitales en España: efectos y roles (PID2024-156034OB-C22).
+# Esta aplicación es parte del proyecto de I+D+i:
 # - XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación (PDC2025-166024-I00).
 # Licencia: MIT (https://opensource.org/license/mit).
 # SPDX-License-Identifier: MIT
@@ -90,6 +89,73 @@ def test_inferir_municipio_desde_organo_local():
     assert inferir_municipio("Junta de Gobierno del Ayuntamiento de Cartagena") == "Cartagena"
     assert inferir_municipio("Órgano de Contratación de la Ciudad Autónoma de Ceuta") == "Ceuta"
     assert inferir_municipio("Servicio Murciano de Salud") is None
+
+
+def test_extrae_territorio_estructurado_de_placsp_sin_municipio_en_organo():
+    from core.placsp import _extraer_contrato
+    import xml.etree.ElementTree as ET
+
+    entry = ET.fromstring(
+        """<entry xmlns="http://www.w3.org/2005/Atom"
+            xmlns:cbc="urn:dgpe:names:draft:codice:schema:xsd:CommonBasicComponents-2"
+            xmlns:cac="urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2"
+            xmlns:cac-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2">
+            <title>Servicio portuario</title>
+            <summary>Órgano de Contratación: Autoridad Portuaria de Vigo; Importe: 1400 EUR</summary>
+            <updated>2026-05-13T12:12:19.727+02:00</updated>
+            <link href="https://contrataciondelestado.es/test" />
+            <cac-place-ext:ContractFolderStatus>
+                <cac-place-ext:LocatedContractingParty>
+                    <cac:Party>
+                        <cac:PartyName><cbc:Name>Autoridad Portuaria de Vigo</cbc:Name></cac:PartyName>
+                        <cac:PostalAddress>
+                            <cbc:CityName>Vigo</cbc:CityName>
+                            <cbc:PostalZone>36201</cbc:PostalZone>
+                        </cac:PostalAddress>
+                    </cac:Party>
+                </cac-place-ext:LocatedContractingParty>
+            </cac-place-ext:ContractFolderStatus>
+            <cac:ProcurementProject><cbc:TypeCode>2</cbc:TypeCode></cac:ProcurementProject>
+            <cac:WinningParty><cbc:Name>ACME SL</cbc:Name></cac:WinningParty>
+            <cbc:AwardDate>2026-05-13</cbc:AwardDate>
+        </entry>"""
+    )
+    fila = _extraer_contrato(entry)
+    assert fila["Municipio"] == "Vigo"
+    assert fila["Provincia"] == "Pontevedra"
+    assert fila["CCAA"] == "Galicia"
+
+
+def test_extrae_provincia_desde_cityname_con_parentesis():
+    from core.placsp import _extraer_contrato
+    import xml.etree.ElementTree as ET
+
+    entry = ET.fromstring(
+        """<entry xmlns="http://www.w3.org/2005/Atom"
+            xmlns:cbc="urn:dgpe:names:draft:codice:schema:xsd:CommonBasicComponents-2"
+            xmlns:cac="urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2"
+            xmlns:cac-place-ext="urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2">
+            <title>Servicio universitario</title>
+            <summary>Órgano de Contratación: Universidad Pública; Importe: 900 EUR</summary>
+            <updated>2026-05-13T12:12:19.727+02:00</updated>
+            <cac-place-ext:ContractFolderStatus>
+                <cac-place-ext:LocatedContractingParty>
+                    <cac:Party>
+                        <cac:PostalAddress>
+                            <cbc:CityName>SANTIAGO DE COMPOSTELA (A CORUÑA)</cbc:CityName>
+                        </cac:PostalAddress>
+                    </cac:Party>
+                </cac-place-ext:LocatedContractingParty>
+            </cac-place-ext:ContractFolderStatus>
+            <cac:ProcurementProject><cbc:TypeCode>2</cbc:TypeCode></cac:ProcurementProject>
+            <cac:WinningParty><cbc:Name>ACME SL</cbc:Name></cac:WinningParty>
+            <cbc:AwardDate>2026-05-13</cbc:AwardDate>
+        </entry>"""
+    )
+    fila = _extraer_contrato(entry)
+    assert fila["Municipio"] == "Santiago de Compostela"
+    assert fila["Provincia"] == "A Coruña"
+    assert fila["CCAA"] == "Galicia"
 
 
 def test_filtrar_por_organos_tolera_acentos_y_nombres_compuestos():

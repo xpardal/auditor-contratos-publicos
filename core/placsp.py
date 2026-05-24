@@ -2,8 +2,7 @@
 # Auditor de Contratos Públicos · Universidade de Santiago de Compostela
 # Módulo: ingesta streaming de feeds Atom de PLACSP y caché Parquet.
 # Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
-# Esta aplicación es parte de los proyectos de I+D+i:
-# - Inteligencia artificial en medios digitales en España: efectos y roles (PID2024-156034OB-C22).
+# Esta aplicación es parte del proyecto de I+D+i:
 # - XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación (PDC2025-166024-I00).
 # Licencia: MIT (https://opensource.org/license/mit).
 # SPDX-License-Identifier: MIT
@@ -39,12 +38,20 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import xml.etree.ElementTree as ET
 
-from .constants import LIMITE_MAXIMO, inferir_geografia, inferir_municipio, inferir_tipo_entidad
+from .constants import (
+    LIMITE_MAXIMO,
+    PROVINCIAS_CCAA,
+    PROVINCIAS_INE,
+    inferir_geografia,
+    inferir_municipio,
+    inferir_tipo_entidad,
+)
 from .money import limpiar_dinero
 
 ATOM_NS = "{http://www.w3.org/2005/Atom}"
 CBC_NS = "{urn:dgpe:names:draft:codice:schema:xsd:CommonBasicComponents-2}"
 CAC_NS = "{urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2}"
+PLACE_CAC_NS = "{urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2}"
 
 # Códigos PLACSP de tipo de contrato (TypeCode dentro de ProcurementProject).
 # https://contrataciondelestado.es/codice (SyndicationContractCode)
@@ -75,7 +82,7 @@ def _firma_carpeta(carpeta: Path, archivos: list[Path]) -> str:
     total_size = sum(a.stat().st_size for a in archivos[:50])  # muestra
     h.update(f"|s={total_size}".encode())
     # Versión del esquema: subir cuando cambien las columnas extraídas
-    h.update(b"|schema=v6")
+    h.update(b"|schema=v7")
     return h.hexdigest()[:16]
 
 
@@ -83,6 +90,119 @@ def _texto(elemento: ET.Element | None) -> str | None:
     if elemento is None or elemento.text is None:
         return None
     return elemento.text.strip() or None
+
+
+def _titulo_lugar(texto: str) -> str:
+    palabras_minusculas = {"a", "al", "da", "de", "del", "do", "el", "la", "las", "los"}
+    partes: list[str] = []
+    for indice, palabra in enumerate(texto.lower().split()):
+        if indice > 0 and palabra in palabras_minusculas:
+            partes.append(palabra)
+        else:
+            partes.append(palabra[:1].upper() + palabra[1:])
+    return " ".join(partes)
+
+
+def _normalizar_provincia(valor: str | None) -> str | None:
+    if not valor:
+        return None
+    texto = re.sub(r"\s+", " ", str(valor)).strip(" .:;,_")
+    if not texto:
+        return None
+    normalizado = _quitar_acentos(texto).replace(",", " ").replace("(", " ").replace(")", " ")
+    normalizado = re.sub(r"\s+", " ", normalizado).strip()
+    if normalizado in {"a coruna", "coruna a", "coruna"}:
+        return "A Coruña"
+    for provincia in sorted(PROVINCIAS_CCAA, key=len, reverse=True):
+        if _quitar_acentos(provincia) == normalizado:
+            return provincia
+    return _titulo_lugar(texto)
+
+
+def _provincia_desde_cp(valor: str | None) -> str | None:
+    if not valor:
+        return None
+    match = re.search(r"\b(\d{2})\d{3}\b", str(valor))
+    if not match:
+        return None
+    return PROVINCIAS_INE.get(match.group(1))
+
+
+def _provincia_en_texto(valor: str | None) -> str | None:
+    if not valor:
+        return None
+    normalizado = _quitar_acentos(valor)
+    for provincia in sorted(PROVINCIAS_CCAA, key=len, reverse=True):
+        if _quitar_acentos(provincia) in normalizado:
+            return provincia
+    return None
+
+
+def _normalizar_municipio(valor: str | None) -> str | None:
+    if not valor:
+        return None
+    texto = re.sub(r"\s+", " ", str(valor)).strip(" .:;,_")
+    if not texto:
+        return None
+    normalizado = _quitar_acentos(texto).replace(",", " ").replace("(", " ").replace(")", " ")
+    normalizado = re.sub(r"\s+", " ", normalizado).strip()
+    if normalizado in {"a coruna", "coruna a", "coruna"}:
+        return "A Coruña"
+    if normalizado in {"valencia valencia", "valencia"}:
+        return "Valencia"
+
+    provincia = _provincia_en_texto(texto)
+    if provincia:
+        texto = re.sub(r"\s*\([^)]*\)\s*$", "", texto).strip()
+        texto = re.sub(rf"\s*[-,/]\s*{re.escape(provincia)}\s*$", "", texto, flags=re.IGNORECASE).strip()
+    return _titulo_lugar(texto)
+
+
+def _ccaa_desde_provincia(provincia: str | None) -> str | None:
+    if not provincia:
+        return None
+    if provincia in PROVINCIAS_CCAA:
+        return PROVINCIAS_CCAA[provincia]
+    normalizada = _quitar_acentos(provincia)
+    for candidata, ccaa in PROVINCIAS_CCAA.items():
+        if _quitar_acentos(candidata) == normalizada:
+            return ccaa
+    return None
+
+
+def _primer_texto(elemento: ET.Element, tag: str) -> str | None:
+    for subelemento in elemento.iter(tag):
+        valor = _texto(subelemento)
+        if valor:
+            return valor
+    return None
+
+
+def _territorio_desde_elemento(elemento: ET.Element) -> tuple[str | None, str | None, str | None]:
+    ciudad = _primer_texto(elemento, f"{CBC_NS}CityName")
+    municipio = _normalizar_municipio(ciudad)
+    provincia = _normalizar_provincia(_primer_texto(elemento, f"{CBC_NS}CountrySubentity"))
+    if not provincia:
+        provincia = _provincia_desde_cp(_primer_texto(elemento, f"{CBC_NS}PostalZone"))
+    if not provincia:
+        provincia = _provincia_en_texto(ciudad) or _provincia_en_texto(municipio)
+    return municipio, provincia, _ccaa_desde_provincia(provincia)
+
+
+def _extraer_territorio_placsp(entry: ET.Element) -> tuple[str | None, str | None, str | None]:
+    for located in entry.iter(f"{PLACE_CAC_NS}LocatedContractingParty"):
+        party = located.find(f"{CAC_NS}Party")
+        if party is None:
+            continue
+        municipio, provincia, ccaa = _territorio_desde_elemento(party)
+        if municipio or provincia or ccaa:
+            return municipio, provincia, ccaa
+
+    for location in entry.iter(f"{CAC_NS}RealizedLocation"):
+        municipio, provincia, ccaa = _territorio_desde_elemento(location)
+        if municipio or provincia or ccaa:
+            return municipio, provincia, ccaa
+    return None, None, None
 
 
 def _normalizar_fecha_placsp(
@@ -212,8 +332,11 @@ def _extraer_contrato(entry: ET.Element) -> dict | None:
             cpv = valor
             break
 
-    provincia, ccaa = inferir_geografia(organo)
-    municipio = inferir_municipio(organo)
+    municipio_xml, provincia_xml, ccaa_xml = _extraer_territorio_placsp(entry)
+    provincia_organo, ccaa_organo = inferir_geografia(organo)
+    municipio = municipio_xml or inferir_municipio(organo)
+    provincia = provincia_xml or provincia_organo
+    ccaa = ccaa_xml or ccaa_organo
     tipo_entidad = inferir_tipo_entidad(organo)
 
     return {

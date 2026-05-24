@@ -2,8 +2,7 @@
 # Auditor de Contratos Públicos · Universidade de Santiago de Compostela
 # Módulo: consultas DuckDB y conversión de liquidaciones del Tribunal de Cuentas.
 # Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
-# Esta aplicación es parte de los proyectos de I+D+i:
-# - Inteligencia artificial en medios digitales en España: efectos y roles (PID2024-156034OB-C22).
+# Esta aplicación es parte del proyecto de I+D+i:
 # - XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación (PDC2025-166024-I00).
 # Licencia: MIT (https://opensource.org/license/mit).
 # SPDX-License-Identifier: MIT
@@ -40,13 +39,33 @@ def mdbtools_disponible() -> bool:
     return shutil.which("mdb-tables") is not None and shutil.which("mdb-export") is not None
 
 
-def listar_tablas_accdb(accdb: str | Path) -> list[str]:
+def _error_mdbtools(comando: list[str], exc: subprocess.CalledProcessError | subprocess.TimeoutExpired) -> str:
+    nombre = Path(comando[0]).name
+    if isinstance(exc, subprocess.TimeoutExpired):
+        return f"{nombre} tardó demasiado y se canceló para evitar bloquear la aplicación."
+    stderr = (exc.stderr or "").strip()
+    detalle = f": {stderr}" if stderr else ""
+    return f"{nombre} terminó con código {exc.returncode}{detalle}"
+
+
+def listar_tablas_accdb(accdb: str | Path, *, timeout: int = 60) -> list[str]:
     """Devuelve las tablas de una base Access .accdb."""
     if not mdbtools_disponible():
         raise RuntimeError(
             "mdbtools no está instalado. Instálalo con:  brew install mdbtools"
         )
-    out = subprocess.check_output(["mdb-tables", "-1", str(accdb)], text=True)
+    comando = ["mdb-tables", "-1", str(accdb)]
+    try:
+        resultado = subprocess.run(
+            comando,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+        raise RuntimeError(_error_mdbtools(comando, exc)) from exc
+    out = resultado.stdout
     return [t.strip() for t in out.splitlines() if t.strip()]
 
 
@@ -56,6 +75,8 @@ def exportar_accdb_a_csv(
     *,
     tablas: list[str] | None = None,
     progreso=None,
+    timeout_listado: int = 60,
+    timeout_tabla: int = 300,
 ) -> list[Path]:
     """Exporta tablas de un .accdb a CSV individuales en `destino`.
 
@@ -68,7 +89,7 @@ def exportar_accdb_a_csv(
     destino = Path(destino)
     destino.mkdir(parents=True, exist_ok=True)
     if tablas is None:
-        tablas = listar_tablas_accdb(accdb)
+        tablas = listar_tablas_accdb(accdb, timeout=timeout_listado)
 
     creados: list[Path] = []
     total = len(tablas)
@@ -90,11 +111,19 @@ def exportar_accdb_a_csv(
         _notificar(i, tabla, "inicio")
         salida = destino / f"{tabla}.csv"
         with salida.open("w", encoding="utf-8") as f:
-            subprocess.run(
-                ["mdb-export", str(accdb), tabla],
-                check=True,
-                stdout=f,
-            )
+            comando = ["mdb-export", str(accdb), tabla]
+            try:
+                subprocess.run(
+                    comando,
+                    check=True,
+                    stdout=f,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    timeout=timeout_tabla,
+                )
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+                salida.unlink(missing_ok=True)
+                raise RuntimeError(f"No se pudo exportar la tabla '{tabla}': {_error_mdbtools(comando, exc)}") from exc
         creados.append(salida)
         _notificar(i, tabla, "fin")
     return creados

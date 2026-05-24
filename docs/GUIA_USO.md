@@ -8,11 +8,8 @@
 **Autores:** Xoán Xosé Pardal Pérez (autor principal) y
 [Alberto Quian](https://albertoquian.github.io/) (apoyo metodológico y técnico).  
 **Institución:** Universidade de Santiago de Compostela.  
-**Esta aplicación es parte de los proyectos de I+D+i:**
+**Esta aplicación es parte del proyecto de I+D+i:**
 
-- *Inteligencia artificial en medios digitales en España: efectos y roles*
-  (PID2024-156034OB-C22), financiado por MICIU/AEI/10.13039/501100011033
-  y “FEDER/UE”.
 - *XornalIA: Desarrollo, validación y transferencia de una plataforma
   integradora de soluciones de inteligencia artificial generativa para medios
   de comunicación* (PDC2025-166024-I00), financiado por el Ministerio de
@@ -29,12 +26,11 @@
 3. [Anatomía de la interfaz](#3-anatomía-de-la-interfaz)
 4. [Flujo 1 · PLACSP (contratos menores del Estado)](#4-flujo-1--placsp-contratos-menores-del-estado)
 5. [Flujo 2 · Tribunal de Cuentas (entes locales)](#5-flujo-2--tribunal-de-cuentas-entes-locales)
-6. [Flujo 3 · Análisis forense de un PDF, CSV o Excel](#6-flujo-3--análisis-forense-de-un-pdf-csv-o-excel)
-7. [Visualizaciones interactivas e informes](#7-visualizaciones-interactivas-e-informes)
-8. [Cómo interpretar las alertas (lectura periodística)](#8-cómo-interpretar-las-alertas-lectura-periodística)
-9. [Privacidad, trazabilidad y manifiestos](#9-privacidad-trazabilidad-y-manifiestos)
-10. [Solución de problemas habituales](#10-solución-de-problemas-habituales)
-11. [Glosario rápido](#11-glosario-rápido)
+6. [Visualizaciones interactivas e informes](#6-visualizaciones-interactivas-e-informes)
+7. [Cómo interpretar las alertas (lectura periodística)](#7-cómo-interpretar-las-alertas-lectura-periodística)
+8. [Privacidad, trazabilidad y manifiestos](#8-privacidad-trazabilidad-y-manifiestos)
+9. [Solución de problemas habituales](#9-solución-de-problemas-habituales)
+10. [Glosario rápido](#10-glosario-rápido)
 
 ---
 
@@ -90,7 +86,7 @@ lanzador la recrea automáticamente con una versión válida antes de abrir la a
 
 ### Dependencia opcional para `.accdb` del Tribunal de Cuentas
 
-Para PLACSP, CSV, Excel, PDF e informes no necesitas nada más. Solo hay
+Para PLACSP, CSV e informes no necesitas nada más. Solo hay
 un caso especial: si quieres abrir directamente `Liquidaciones2024.accdb`
 del Tribunal de Cuentas, el ordenador necesita **mdbtools**, un conversor
 externo de bases Access.
@@ -133,13 +129,12 @@ sudo apt install mdbtools
 Al abrir la app verás:
 
 - **Barra lateral izquierda**:
-  - *Fuente de datos*: elige entre PLACSP, Tribunal de Cuentas o Archivo
-    individual.
+  - *Fuente de datos*: elige entre PLACSP, Tribunal de Cuentas o la guía.
   - *Umbrales del radar*: cuántos contratos mínimo deben acumularse para
     disparar alerta (2 = más sensible, 3+ = menos falsos positivos).
 - **Zona principal**: cambia según la fuente elegida.
-- **Botones de selección de archivo**: permiten elegir `.atom`, CSV,
-  Excel, PDF o `.accdb` desde el navegador local cuando tiene sentido.
+- **Botones de selección de archivo**: permiten elegir `.atom`, CSV o
+  `.accdb` desde el navegador local cuando tiene sentido.
 - **Campos de ruta local**: siguen disponibles para carpetas completas o
   archivos muy grandes. Las carpetas de trabajo se pueden crear desde la
   interfaz.
@@ -163,7 +158,9 @@ ayuntamiento) usando la Plataforma de Contratación del Sector Público.
    - 30-100 páginas: mes/trimestre.
    - 300+ páginas: histórico anual.
 4. Pulsa **⬇️ Descargar/actualizar PLACSP**.
-   Cada página es ~4 MB. Verás una barra de progreso y un manifiesto JSON.
+  Cada página es ~4 MB. Verás una barra de progreso y un manifiesto JSON. Para
+  localizar ayuntamientos concretos en auditorías municipales, usa una descarga
+  profunda: algunos órganos no aparecen hasta pasadas más de 100 páginas del feed.
 
 También puedes saltarte la descarga oficial si ya tienes archivos `.atom`:
 
@@ -183,18 +180,23 @@ También puedes saltarte la descarga oficial si ya tienes archivos `.atom`:
 
 ### Paso 3 — Filtrar y disparar el radar
 
-1. Filtra por **comunidad autónoma**, **provincia**, **tipo de entidad**
+1. Abre **🧭 Diagnóstico de cobertura municipal** cuando quieras comprobar
+  si un ayuntamiento/concello aparece como órgano contratante en los `.atom`
+  cargados o si solo hay contratos ubicados en ese municipio. Si no aparece
+  en este panel, amplía la descarga o verifica si la entidad publica sus
+  contratos menores en otra plataforma.
+2. Filtra por **comunidad autónoma**, **provincia**, **municipio**, **tipo de entidad**
   (ayuntamiento, diputación, ministerio, universidad, etc.), **organismo**
   y **año fiscal**.
-2. Usa los buscadores de **adjudicatario** y **concepto** para localizar
+3. Usa los buscadores de **adjudicatario** y **concepto** para localizar
   proveedores o servicios concretos, y ajusta el **rango de importe** para
   concentrarte en contratos próximos a los límites legales.
-3. Revisa la tabla enriquecida: incluye órgano, territorio, tipo de entidad,
+4. Revisa la tabla enriquecida: incluye órgano, territorio, tipo de entidad,
   CPV, concepto, adjudicatario, importe y enlace al expediente PLACSP cuando
   el feed lo publica.
-4. Baja al **🦊 Radar de fraccionamiento sistemático**: cualquier grupo
+5. Baja al **🦊 Radar de fraccionamiento sistemático**: cualquier grupo
    marcado 🟠/🔴/🚨 son los candidatos a investigar.
-5. Abre la **ficha de caso prioritario** para ver el índice 0-100, las
+6. Abre la **ficha de caso prioritario** para ver el índice 0-100, las
   señales que explican la alerta y los contratos concretos que la forman.
 
 ### Paso 4 — Visualizar y exportar
@@ -233,9 +235,13 @@ en 2024?*.
   botón o indica una ruta local. Para archivos muy grandes, la ruta local
   suele ser más cómoda.
 3. Indica o crea desde la interfaz la carpeta de salida.
-4. Pulsa **🔧 Convertir todas las tablas**. Quedará todo como CSV listo
-   para la pestaña anterior.
-5. Si la app avisa de que falta `mdbtools`, sigue las instrucciones que
+4. Deja activada la opción de convertir solo `tb_economica` y
+  `tb_inventario` salvo que necesites exportar todo el `.accdb`.
+5. Ajusta el tiempo máximo por tabla si el archivo es muy grande.
+6. Pulsa **🔧 Convertir tablas**. Quedará todo como CSV listo para la
+  pestaña anterior. Si `mdbtools` se queda bloqueado en una tabla, la app
+  cancela esa conversión y muestra un error en vez de quedarse colgada.
+7. Si la app avisa de que falta `mdbtools`, sigue las instrucciones que
   aparecen en pantalla o exporta las dos tablas principales a CSV desde
   Access/LibreOffice.
 
@@ -249,22 +255,7 @@ en 2024?*.
 
 ---
 
-## 6. Flujo 3 · Análisis forense de un PDF, CSV o Excel
-
-Útil para un dictamen, una factura sospechosa o un anexo presupuestario.
-
-1. Sube el archivo (PDF, CSV o Excel).
-2. Marca qué patrones quieres buscar (importes €, IBAN, NIF, etc.).
-3. La herramienta marcará los hallazgos con:
-   - 🚩 importes que **rozan** el límite legal (sin IVA).
-   - 🚨 importes que coinciden con la **trampa IVA**
-     (15.000 + 21% ≈ 18.150; 40.000 + 21% ≈ 48.400; 15.000 + 10% ≈ 16.500).
-4. Si el CSV/Excel incluye adjudicatario, importe y fecha/año, la app
-  activa también el **radar de fraccionamiento** sobre ese archivo.
-
----
-
-## 7. Visualizaciones interactivas e informes
+## 6. Visualizaciones interactivas e informes
 
 No todas las fuentes tienen el mismo nivel de detalle. La app adapta las
 salidas al dato disponible:
@@ -273,8 +264,6 @@ salidas al dato disponible:
 | --- | --- |
 | **PLACSP** | Radar completo, ficha de caso, tablas, gráficos interactivos, red de relaciones, mapa, informe HTML/PDF, CSV y PNG. |
 | **Tribunal de Cuentas** | Ranking de entidades por capítulo, tabla descargable, gráfico de barras, ranking interactivo y detalle por entidad. No hay radar contractual porque las liquidaciones no incluyen contratos menores por adjudicatario. |
-| **Archivo PDF** | Escáner de patrones por página: importes, NIF, IBAN, emails, teléfonos, fechas y banderas de umbral. |
-| **Archivo CSV/Excel** | Escáner de patrones y, si la tabla incluye adjudicatario/proveedor, importe y fecha/año, también radar completo con gráficos e informes. |
 
 Cuando hay análisis con radar tienes:
 
@@ -307,7 +296,7 @@ Cuando hay análisis con radar tienes:
 
 ---
 
-## 8. Cómo interpretar las alertas (lectura periodística)
+## 7. Cómo interpretar las alertas (lectura periodística)
 
 Una alerta del radar significa que **un mismo adjudicatario** acumula
 contratos menores con **un mismo órgano** y **un mismo tipo de contrato**
@@ -339,7 +328,7 @@ publicar conviene:
 
 ---
 
-## 9. Privacidad, trazabilidad y manifiestos
+## 8. Privacidad, trazabilidad y manifiestos
 
 - **Local-first**: ningún dato se sube a servidores externos. Todo el
   procesamiento ocurre en tu ordenador.
@@ -351,7 +340,7 @@ publicar conviene:
 
 ---
 
-## 10. Solución de problemas habituales
+## 9. Solución de problemas habituales
 
 | Síntoma | Posible causa | Cómo arreglarlo |
 | --- | --- | --- |
@@ -368,7 +357,7 @@ publicar conviene:
 
 ---
 
-## 11. Glosario rápido
+## 10. Glosario rápido
 
 - **Contrato menor**: contrato sin licitación pública, hasta 15.000 € en
   servicios/suministros y 40.000 € en obras (Ley 9/2017, art. 118).

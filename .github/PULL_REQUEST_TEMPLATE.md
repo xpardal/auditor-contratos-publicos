@@ -16,7 +16,7 @@
 - [ ] `pytest -q`
 - [ ] Verificación manual en `streamlit run app.py`
 
-Indica qué fuentes de datos se han usado para la verificación (PLACSP, Tribunal de Cuentas, archivo individual).
+Indica qué fuentes de datos se han usado para la verificación (PLACSP o Tribunal de Cuentas).
 
 ## Checklist
 

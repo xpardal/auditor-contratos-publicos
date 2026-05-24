@@ -2,8 +2,7 @@
 # Auditor de Contratos Públicos · Universidade de Santiago de Compostela
 # Módulo: constantes legales, provincias de referencia y patrones regex.
 # Autores: Xoán Xosé Pardal Pérez; Alberto Quian (apoyo metodológico y técnico).
-# Esta aplicación es parte de los proyectos de I+D+i:
-# - Inteligencia artificial en medios digitales en España: efectos y roles (PID2024-156034OB-C22).
+# Esta aplicación es parte del proyecto de I+D+i:
 # - XornalIA: Desarrollo, validación y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicación (PDC2025-166024-I00).
 # Licencia: MIT (https://opensource.org/license/mit).
 # SPDX-License-Identifier: MIT
@@ -39,6 +38,62 @@ PATRONES = {
 
 # Provincias gallegas (códigos INE)
 PROVINCIAS_GALICIA = ("15", "27", "32", "36")
+
+# Códigos provinciales INE usados también como prefijo postal de dos dígitos.
+PROVINCIAS_INE: dict[str, str] = {
+    "01": "Álava",
+    "02": "Albacete",
+    "03": "Alicante",
+    "04": "Almería",
+    "05": "Ávila",
+    "06": "Badajoz",
+    "07": "Baleares",
+    "08": "Barcelona",
+    "09": "Burgos",
+    "10": "Cáceres",
+    "11": "Cádiz",
+    "12": "Castellón",
+    "13": "Ciudad Real",
+    "14": "Córdoba",
+    "15": "A Coruña",
+    "16": "Cuenca",
+    "17": "Girona",
+    "18": "Granada",
+    "19": "Guadalajara",
+    "20": "Gipuzkoa",
+    "21": "Huelva",
+    "22": "Huesca",
+    "23": "Jaén",
+    "24": "León",
+    "25": "Lleida",
+    "26": "La Rioja",
+    "27": "Lugo",
+    "28": "Madrid",
+    "29": "Málaga",
+    "30": "Murcia",
+    "31": "Navarra",
+    "32": "Ourense",
+    "33": "Asturias",
+    "34": "Palencia",
+    "35": "Las Palmas",
+    "36": "Pontevedra",
+    "37": "Salamanca",
+    "38": "Santa Cruz de Tenerife",
+    "39": "Cantabria",
+    "40": "Segovia",
+    "41": "Sevilla",
+    "42": "Soria",
+    "43": "Tarragona",
+    "44": "Teruel",
+    "45": "Toledo",
+    "46": "Valencia",
+    "47": "Valladolid",
+    "48": "Bizkaia",
+    "49": "Zamora",
+    "50": "Zaragoza",
+    "51": "Ceuta",
+    "52": "Melilla",
+}
 
 # -----------------------------------------------------------------------------
 # Mapa provincia → comunidad autónoma (50 provincias + Ceuta y Melilla).

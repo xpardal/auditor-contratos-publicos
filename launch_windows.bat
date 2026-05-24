@@ -3,8 +3,7 @@ REM ============================================================================
 REM Auditor de Contratos Publicos · Universidade de Santiago de Compostela
 REM Lanzador: Windows, instalacion de dependencias y arranque de Streamlit.
 REM Autores: Xoan Xose Pardal Perez; Alberto Quian (apoyo metodologico y tecnico).
-REM Esta aplicacion es parte de los proyectos de I+D+i:
-REM - Inteligencia artificial en medios digitales en Espana: efectos y roles (PID2024-156034OB-C22).
+REM Esta aplicacion es parte del proyecto de I+D+i:
 REM - XornalIA: Desarrollo, validacion y transferencia de una plataforma integradora de soluciones de inteligencia artificial generativa para medios de comunicacion (PDC2025-166024-I00).
 REM Licencia: MIT (https://opensource.org/license/mit).
 REM SPDX-License-Identifier: MIT
