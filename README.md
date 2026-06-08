@@ -128,11 +128,11 @@ El proyecto incluye configuración experimental de PyInstaller en [packaging/](p
 
 Si usas este repositorio, la aplicación o parte de su código en un trabajo académico, periodístico o docente, cita a sus autores:
 
-> Pardal Pérez, Xoán Xosé, y Quian, Alberto (2026). *Auditor de Contratos Públicos* (versión 1.0.1) [software]. Universidade de Santiago de Compostela. https://github.com/AlbertoQuian/auditor-contratos-publicos
+> Pardal Pérez, Xoán, y Quian, Alberto (2026). *Auditor de Contratos Públicos* (versión 1.0.1) [software]. Universidade de Santiago de Compostela. https://github.com/AlbertoQuian/auditor-contratos-publicos
 
 ```bibtex
 @software{pardal_perez_quian_2026_auditor_contratos_publicos,
-	author = {Pardal Pérez, Xoán Xosé and Quian, Alberto},
+	author = {Pardal Pérez, Xoán and Quian, Alberto},
 	title = {Auditor de Contratos Públicos},
 	year = {2026},
 	version = {1.0.1},
@@ -144,7 +144,7 @@ Si usas este repositorio, la aplicación o parte de su código en un trabajo aca
 
 ## Autoría, proyecto y licencia
 
-Aplicación desarrollada en coautoría por **Xoán Xosé Pardal Pérez** (autor principal) y **[Alberto Quian](https://albertoquian.github.io/)** (apoyo metodológico y técnico), en la **Universidade de Santiago de Compostela**.
+Aplicación desarrollada en coautoría por **Xoán Pardal Pérez** (autor principal) y **[Alberto Quian](https://albertoquian.github.io/)** (apoyo metodológico y técnico), en la **Universidade de Santiago de Compostela**.
 
 Esta aplicación es parte del proyecto de I+D+i:
 
