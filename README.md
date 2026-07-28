@@ -6,6 +6,7 @@
 [![python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![platform](https://img.shields.io/badge/macOS%20%7C%20Linux%20%7C%20Windows-supported-lightgrey)](#compatibilidad)
+[![DOI](https://zenodo.org/badge/1264760836.svg)](https://doi.org/10.5281/zenodo.21652746)
 
 ## Qué permite hacer
 
